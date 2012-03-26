@@ -11,6 +11,9 @@
 
 @interface RHFraction ()
 
+@property (nonatomic, readwrite) NSInteger numerator;
+@property (nonatomic, readwrite) NSInteger denominator;
+
 - (NSInteger)gcdOfFirstInteger:(NSInteger)int1 secondInteger:(NSInteger)int2;
 
 @end
@@ -42,6 +45,10 @@
     return [self initWithNumerator:number denominator:1];
 }
 
+- (float)floatValue {
+    return (float) self.numerator / (float) self.denominator;
+}
+
 #pragma mark - Class Methods
 
 + (id)one {
@@ -60,6 +67,41 @@
     return [[RHFraction alloc] initWithNumerator:numerator denominator:denominator];
 }
 
+#pragma mark - Modification Methods
+
+- (id)abs {
+    return [RHFraction fractionWithNumerator:abs(self.numerator) denominator:self.denominator];
+}
+
+- (id)negate {
+    return [RHFraction fractionWithNumerator:-self.numerator denominator:self.denominator];
+}
+
+- (id)fractionByAddingFraction:(RHFraction *)fraction {
+    NSInteger newNumerator = self.numerator * fraction.denominator + fraction.numerator * self.denominator;
+    return [RHFraction fractionWithNumerator:newNumerator
+                                 denominator:(self.denominator * fraction.denominator)];
+}
+
+- (id)fractionBySubtractingFraction:(RHFraction *)fraction {
+    return [self fractionByAddingFraction:fraction.negate];
+}
+
+- (id)fractionByMultiplyingByFraction:(RHFraction *)fraction {
+    return [RHFraction fractionWithNumerator:(self.numerator * fraction.numerator)
+                                 denominator:(self.denominator * fraction.denominator)];
+}
+
+- (id)fractionByDividingByFraction:(RHFraction *)fraction {
+    RHFraction *flipped = [RHFraction fractionWithNumerator:fraction.denominator
+                                                denominator:fraction.numerator];
+    return [self fractionByMultiplyingByFraction:flipped];
+}
+
+- (NSComparisonResult)compare:(RHFraction *)fraction {
+    return [[NSNumber numberWithFloat:self.floatValue] compare:[NSNumber numberWithFloat:fraction.floatValue]];
+}
+
 #pragma mark - NSObject Overrides
 
 - (id)init {
@@ -72,6 +114,14 @@
     }
     
     return [NSString stringWithFormat:@"%d/%d", self.numerator, self.denominator];
+}
+
+- (BOOL)isEqual:(id)object {
+    if (object == self) return YES;
+    if (!object || ![object isKindOfClass:[RHFraction class]]) return NO;
+    
+    RHFraction *fraction = (RHFraction *) object;
+    return fraction.numerator == self.numerator && fraction.denominator == self.denominator;
 }
 
 #pragma mark - Private Methods
